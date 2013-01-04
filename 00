@@ -1,19 +1,25 @@
+ZALOZENIE:
+Pomaganie w duzych projektach
+(a nie skakanie po funkcjach)
+
+INTERAKCJA Z UZYTKOWNIKIEM:
+  Podczas edycji
+    Pokaznie mu funkcji z podlewelów obecnej funkcji.
+    Pokazniae mu funkcji na nadlewelu obecnej. 
+  Generowanie raportu, diagramu...
+
+WIDOK DLA UZYTKOWNIKA
+- vim: podokno jak w plugin/taglist.vim [TT]
+- graficzny: strzalki do odpowiednich funkcji
+
+TWORZENIE LEVELI ALGO:
 NEXT:
-how to use cscope? 
-
-FEATURES:
-- generowanie raportu o levelach
-
-Jak 3D? 
-- color pod całą funkcją
-- color indetów w funkcji
-- taby pokazujące wypuklenie ... raczej nie
-- indentacja za liniami textu a nie przed <Tab>###
-
-User interaction:
-- prorgamista widzi w czasie pisanie kodu że jakas funkcją jest z jakiegos innego poziomu. kolory chyba najlepszym rozwiązaniem
-- browser pokazujące funkcje pogrupowane !
 
 
+
+=====================================
+colory 2D
+funkcje sąsiednie Hue
+funkcje podrzedne Saturation
 
 Jak sie maja klasy do tego projektu
