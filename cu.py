@@ -8,11 +8,15 @@ from subprocess import Popen,PIPE
 from time import sleep
 from pdb import set_trace as trace
 import sys
+from copy import deepcopy
 
 CSCOPE = 'cscope'
 
 visited = {}
 def create_tree( f ) :
+  """
+  recursive tree made of Function nodes
+  """
   visited[f.name] = f
   outs = writeln("2"+f.name)
   for hit in outs:
@@ -26,6 +30,10 @@ def create_tree( f ) :
         create_tree( sub_f )
 
 def writeln( str ):
+  """
+  write command line to cscope -l 
+  and read output
+  """
   pipes.stdin.write( str + "\n" )
   pipes.stdin.flush()
   line = pipes.stdout.readline()
@@ -43,6 +51,22 @@ def writeln( str ):
     result.append(elements[1])
   return result
 
+def first_the_same_element_in_lists( l1, l2 ):
+  """
+  find the first common element in two lists
+  Return (that element, index in l1, index in l2)
+  """
+  i1 = 0
+  for e1 in l1:
+    try:
+      i2 = l2.index(e1)
+      return (e1, i1, i2)
+    except ValueError:
+      pass
+    i1 += 1
+  return (None, None, None)
+
+
 class Function(object):
   all = {} # non recurisve list of all Functions
   def __init__(me, name):
@@ -52,11 +76,17 @@ class Function(object):
     me.name = name # Function name, duplicated from parents.calls dictionary
     Function.all[ name ] = me
   def add_new_call(me, name):
+    """
+    add new Function element as a child to this element
+    """
     f = Function( name ) 
     me.calls[ name ] = f # tree structure
     f.used[ me.name ] = me # backreference
     return f
   def add_existing_call(me, she):
+    """
+    add existing function elment under another (this) parent function
+    """
     me.calls[ she.name ] = she # tree structure
     she.used[ me.name ] = me # backreference
     return she
@@ -64,8 +94,12 @@ class Function(object):
     indentation = "    " * depth
     head = ""
     tail = ""
-    if len(me.used) > 1:
-      tail += str(len(me.used))
+    #if len(me.used) > 1:
+    #  tail += str(len(me.used))
+    if len(me.distances) == 1 and me.distances[0] == -1:
+      pass
+    else:
+      tail += str(me.max_distance())
     if graph:
       tail += str(me.used.keys())
     if layers:
@@ -87,6 +121,9 @@ class Function(object):
            f.print_tree(layers, graph, depth+1, parents)
         del( parents[ me.name ] )
   def find_strong_layers( me ):
+    """
+    find layer of functions which have just one and common parent
+    """
     me.strong_layers = {}
     for f in Function.all.values():
       if len(f.used) == 1:
@@ -96,6 +133,7 @@ class Function(object):
           me.strong_layers[ f.used.keys()[0] ].append( f )
         except KeyError:
           me.strong_layers[ f.used.keys()[0] ] = [ ( f ) ]
+
   def print_strong_layers( me ):
     counter = 0
     for k,v in me.strong_layers.items():
@@ -105,21 +143,71 @@ class Function(object):
       print "=> %s" % k 
     print "STRONG RATIO %g" % (float(counter)/len(Function.all))
 
-          
+  def distances_to_myself ( me, end_name ):
+    """ 
+    calculate distances to other calls of this function
+    """
+    if len(me.used) <= 1:
+      me.distances = [ -1 ]
+    else:
+      paths = me.find_all_paths( end_name )
+      # every path with each other
+      distances = []
+      for i in xrange( len( paths ) ):
+        for j in xrange( i+1, len( paths ) ):
+          (_,d1,d2) = first_the_same_element_in_lists( paths[i][1:], paths[j][1:] )
+          distances.append( d1 + d2 + 2 )
+      me.distances = distances
+
+  def find_all_distances( me, end_name ):
+    """
+    calculate self distances for every function
+    """
+    for f in Function.all.values():
+      f.distances_to_myself( end_name )
+
+  def max_distance( me ):
+    """
+    max distance from self-distances
+    """
+    return max(me.distances)
+
+  def find_all_paths(me,  end_name, path=[]):
+    """
+    all path from function up to end_name
+    end_name usally will be "main"
+    """
+    path = path + [me.name]
+    if me.name == end_name:
+        return [path]
+    paths = []
+    for up_f in me.used.values():
+        if up_f.name not in path:
+            newpaths = up_f.find_all_paths(end_name, path)
+            for newpath in newpaths:
+                paths.append(newpath)
+    return paths
+
+
 
 
 if __name__ == "__main__":
 
-  #fname = "theater_init"
   fname = "main"
+
   if len(sys.argv) > 1:
     fname = sys.argv[1]
 
-  pipes = Popen([CSCOPE,'-l','-k','-R'],stdin=PIPE,stdout=PIPE,stderr=PIPE)  
+  pipes = Popen( [CSCOPE,'-l','-k','-R'],
+                stdin=PIPE,
+                stdout=PIPE,
+                stderr=PIPE)  
 
-  T = Function(fname)
-  create_tree(T)
-  T.find_strong_layers()
-  T.print_tree(layers=True)
+  root = Function(fname)
+  create_tree(root)
+  root.find_strong_layers()
+  root.find_all_distances( end_name = fname ) 
+  
+  root.print_tree(layers=True)
   print "====="
-  T.print_strong_layers()
+  root.print_strong_layers()
