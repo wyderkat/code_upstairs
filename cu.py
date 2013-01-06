@@ -93,23 +93,26 @@ class Function(object):
   def print_tree(me, layers = False, graph=False, depth=0, parents={}):
     indentation = "    " * depth
     head = ""
-    tail = ""
+    tail = " "
     #if len(me.used) > 1:
     #  tail += str(len(me.used))
     if len(me.distances) == 1 and me.distances[0] == -1:
       pass
     else:
-      tail += str(me.max_distance())
+      try:
+        tail += str(me.max_distance())
+      except ValueError:
+        print "ERR %s" % me.name
     if graph:
       tail += str(me.used.keys())
     if layers:
       try:
-        tail += "             [[ %s ]]" % me.strong_layer
+        tail += "             - %s -" % me.strong_layer
       except AttributeError:
         pass
-    print head, indentation , me.name, tail
+    print head + indentation + me.name + tail
     if me.name in parents:
-      print indentation, ".. RECURSION (%s)" % me.name
+      print indentation + "... RECURSION (%s)" % me.name
       return
     else:
       if len(me.calls) == 0:
@@ -147,17 +150,19 @@ class Function(object):
     """ 
     calculate distances to other calls of this function
     """
+    me.distances = []
+    if me.name in me.used.keys(): # shallow recurence
+      me.distances.append( 1 )  # 1 is distance for shallow recurence
+
     if len(me.used) <= 1:
-      me.distances = [ -1 ]
+      me.distances.append( -1 )
     else:
       paths = me.find_all_paths( end_name )
       # every path with each other
-      distances = []
       for i in xrange( len( paths ) ):
         for j in xrange( i+1, len( paths ) ):
           (_,d1,d2) = first_the_same_element_in_lists( paths[i][1:], paths[j][1:] )
-          distances.append( d1 + d2 + 2 )
-      me.distances = distances
+          me.distances.append( d1 + d2 + 2 )
 
   def find_all_distances( me, end_name ):
     """
@@ -187,6 +192,8 @@ class Function(object):
             for newpath in newpaths:
                 paths.append(newpath)
     return paths
+  def get_all_functions_count( me ):
+    return len(Function.all)
 
 
 
@@ -211,3 +218,4 @@ if __name__ == "__main__":
   root.print_tree(layers=True)
   print "====="
   root.print_strong_layers()
+  print "Functions in source %d " % root.get_all_functions_count()
