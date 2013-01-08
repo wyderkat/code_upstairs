@@ -22,6 +22,14 @@ WIDOK DLA UZYTKOWNIKA
 TWORZENIE LEVELI ALGO:
 NEXT:
 
+Inne narzedzia generujące call graph:
+- doxygen (probably python too)
+- cflow (only c) 
+- pyscope
+
+Generacja crossreference from cscope and ctags
+http://sourceforge.net/projects/ccglue/
+
 
 
 =====================================
