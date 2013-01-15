@@ -4,39 +4,56 @@
 #  www.cofoh.com
 # Licensed under GPL-2
 ##
+
 from subprocess import Popen,PIPE  
-from time import sleep
-from pdb import set_trace as trace
-import sys
-from copy import deepcopy
+#from pdb import set_trace as trace
 
-CSCOPE = 'cscope'
 
-visited = {}
-def create_tree( f ) :
+def init_connection( ):
+  CSCOPE = 'cscope'
+  pipes = Popen( [CSCOPE,'-l','-k','-R'],
+                stdin=PIPE,
+                stdout=PIPE,
+                stderr=PIPE)  
+  return pipes
+
+def Create_tree( conn, f_name, parent = None, visited = {} ) :
+# visited {'fun_name': Function, 'not_our_fun_name': None }
   """
   recursive tree made of Function nodes
   """
-  visited[f.name] = f
-  outs = writeln("2"+f.name)
-  for hit in outs:
-    try:
-      f1 = visited[ hit ]
-      f.add_existing_call( f1 ) 
-    except KeyError: # not visited 
-      definition = writeln("1"+hit)
-      if len(definition) > 0: # it's function in our project
-        sub_f = f.add_new_call( hit ) 
-        create_tree( sub_f )
+  try:
+    f = visited[ f_name ]
+    if f:
+      parent.add_existing_call( f ) 
+  except KeyError: # not visited 
+    visited[f_name] = None
+    definition = writeln(conn, "1"+f_name, None)
+    if len(definition) > 0: # it's function in our project
+      if parent:
+        f = parent.add_new_call( f_name ) 
+      else:
+        f = Function(f_name)
+      visited[f.name] = f
+      f.file = definition[0][0]
+      f.line = int(definition[0][2])
+      outs = writeln(conn, "2"+f.name)
+      for hit in outs:
+        Create_tree( conn, hit, f , visited)
+      if not parent:
+        return f
 
-def writeln( str ):
+
+def writeln( conn, str, columns=1 ):
   """
   write command line to cscope -l 
-  and read output
+  and read output from every line and 
+  given column. if column== None,
+  all columns are returned in sublist
   """
-  pipes.stdin.write( str + "\n" )
-  pipes.stdin.flush()
-  line = pipes.stdout.readline()
+  conn.stdin.write( str + "\n" )
+  conn.stdin.flush()
+  line = conn.stdout.readline()
   try:
     no_of_lines = int( line.split()[2] ) 
   except IndexError:
@@ -45,10 +62,13 @@ def writeln( str ):
   #print "NO %d" %no_of_lines
   result = []
   for i in range(no_of_lines):
-    line = pipes.stdout.readline()
+    line = conn.stdout.readline()
     elements = line.split()
     #print elements[1]
-    result.append(elements[1])
+    if columns != None:
+      result.append( elements[columns] )
+    else:
+      result.append( elements )
   return result
 
 def first_the_same_element_in_lists( l1, l2 ):
@@ -195,23 +215,49 @@ class Function(object):
   def get_all_functions_count( me ):
     return len(Function.all)
 
+class Location(object):
+  def __init__( me, functions_tree ):
+    # building back-reference
+    me.backref = {}
+    for f in functions_tree.all.values():
+      try:
+        # table update
+        me.backref[ f.file ].append( ( f.line, f.name ) )
+      except KeyError:
+        # table init
+        me.backref[ f.file ] = [ ( f.line, f.name ) ]
+    # sorting back-reference
+    for i in me.backref.values():
+      i.sort( lambda x,y: cmp( x[0],y[0] ) )
+  def what( me, file, line ) :
+    """
+    What function definition is in this line and file
+    """
+    founded = None
+    try:
+      for (l,f) in me.backref[ file ]:
+         if l > line :
+           break
+         founded = f
+    except KeyError: # nothing in file
+      founded = None
+    return founded
 
 
+    
 
 if __name__ == "__main__":
 
+  import sys
   fname = "main"
 
   if len(sys.argv) > 1:
     fname = sys.argv[1]
 
-  pipes = Popen( [CSCOPE,'-l','-k','-R'],
-                stdin=PIPE,
-                stdout=PIPE,
-                stderr=PIPE)  
+  conn = init_connection()
 
-  root = Function(fname)
-  create_tree(root)
+  root = Create_tree(conn, fname)
+  loc = Location( root )
   root.find_strong_layers()
   root.find_all_distances( end_name = fname ) 
   
@@ -219,3 +265,4 @@ if __name__ == "__main__":
   print "====="
   root.print_strong_layers()
   print "Functions in source %d " % root.get_all_functions_count()
+  #print loc.what( "linenoise.c", 200 )
