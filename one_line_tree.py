@@ -7,7 +7,7 @@
 from collections import OrderedDict as OD
 
 
-def main( current_sel ):
+def main( current_sel, width ):
   if not len( current_sel ):
     current_sel = ["childs", "acc"]
   fname = "kick"
@@ -18,7 +18,6 @@ def main( current_sel ):
                ("4",        OD([ ("kota",0) ]) ),
                (">4",       OD([ ("fx",0), ("xx123456789"*6,0) ]) )
                ])
-  width = 80
 
   css = { 
           "sym" : {
@@ -36,7 +35,7 @@ def main( current_sel ):
         }
 
 
-  print render_line( tree, current_sel, width, css )
+  return render_line( tree, current_sel, width, css )
 
 def render_line( tree, current_sel, width, css ):
   rendered_elements = OD( )
@@ -106,5 +105,5 @@ def render_subelement( e_curr, tree, current_sel, width, css ):
 
 if __name__ == "__main__": 
   import sys
-  main( sys.argv[1:] )
+  print main( sys.argv[1:], 80 )
 

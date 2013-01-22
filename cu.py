@@ -7,6 +7,7 @@
 
 from subprocess import Popen,PIPE  
 #from pdb import set_trace as trace
+from collections import OrderedDict as OD
 
 
 def init_connection( ):
@@ -89,6 +90,10 @@ def first_the_same_element_in_lists( l1, l2 ):
 
 class Function(object):
   all = {} # non recurisve list of all Functions
+
+  def who( me , fname ): 
+    return me.all[ fname ]
+
   def __init__(me, name):
     me.calls = {} # Functions which are called from 'me' Function 
     me.used  = {} # Functions which are calling 'me' Function
@@ -147,24 +152,45 @@ class Function(object):
     """
     find layer of functions which have just one and common parent
     """
-    me.strong_layers = {}
+    Function.strong_layers = {}
     for f in Function.all.values():
       if len(f.used) == 1:
         #print "name %s used %s" % (f.name, f.used.keys()[0] )
         f.strong_layer = f.used.keys()[0]
         try: 
-          me.strong_layers[ f.used.keys()[0] ].append( f )
+          Function.strong_layers[ f.used.keys()[0] ].append( f )
         except KeyError:
-          me.strong_layers[ f.used.keys()[0] ] = [ ( f ) ]
+          Function.strong_layers[ f.used.keys()[0] ] = [ ( f ) ]
 
   def print_strong_layers( me ):
     counter = 0
-    for k,v in me.strong_layers.items():
+    for k,v in Function.strong_layers.items():
       for f in v:
         print "%s " % f.name ,
         counter += 1
       print "=> %s" % k 
     print "STRONG RATIO %g" % (float(counter)/len(Function.all))
+
+  def what_strong_layer_childs( me ):
+    result = []
+    try:
+      childs = Function.strong_layers[ me.name ]
+    except KeyError:
+      return result
+    for f in childs:
+      result.append( f.name )
+    return result
+
+  def what_strong_layer_siblings( me ):
+    result = []
+    for k,v in Function.strong_layers.items():
+      if me in v:
+        for f in v:
+          if f == me:
+            continue
+          result.append( f.name )
+        break
+    return result
 
   def distances_to_myself ( me, end_name ):
     """ 
@@ -215,6 +241,34 @@ class Function(object):
   def get_all_functions_count( me ):
     return len(Function.all)
 
+
+  def what_is_upstairs( me ):
+    tree = OD ()
+    # parents
+    j = OD()
+    for fn in me.used.keys():
+      j[ fn ] = 0 # 0 because of later use
+    tree[ "parents" ] = j
+    # siblings
+    j = OD()
+    for fn in me.what_strong_layer_siblings():
+      j[ fn ] = 0 # 0 because of later use
+    tree[ "siblings" ] = j
+    # childs
+    j = OD()
+    for fn in me.what_strong_layer_childs():
+      j[ fn ] = 0 # 0 because of later use
+    tree[ "childs" ] = j
+    # other distances
+    for f in me.calls.values():
+      d = f.max_distance()
+      if d>=0:
+        try:
+          tree[ str(d) ][ f.name ] = 0 
+        except KeyError:
+          tree[ str(d) ] = OD( [ (f.name, 0) ] )
+    return tree
+
 class Location(object):
   def __init__( me, functions_tree ):
     # building back-reference
@@ -248,6 +302,7 @@ class Location(object):
 
 if __name__ == "__main__":
 
+
   import sys
   fname = "main"
 
@@ -265,4 +320,10 @@ if __name__ == "__main__":
   print "====="
   root.print_strong_layers()
   print "Functions in source %d " % root.get_all_functions_count()
+  print "Strong layer for init: %s" % \
+      str( root.who("init").what_strong_layer_childs() )
+  print "Strong layer siblings for init: %s" % \
+      str( root.who("init").what_strong_layer_siblings() )
+  print "What is upstairs: %s" % \
+      str( root.who("calc").what_is_upstairs() )
   #print loc.what( "linenoise.c", 200 )
