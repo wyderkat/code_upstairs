@@ -10,7 +10,6 @@ from collections import OrderedDict as OD
 def main( current_sel, width ):
   if not len( current_sel ):
     current_sel = ["childs", "acc"]
-  fname = "kick"
   tree = OD ([ ("parents",  OD([ ("main",0) ]) ) , 
                ("siblings", OD([ ("init",0), ("update",0) ]) ) , 
                ("childs",   OD([ ("calc",0), ("precalc",0), ("acc",0) ]) ),

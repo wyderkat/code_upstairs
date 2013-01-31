@@ -19,8 +19,6 @@ WIDOK DLA UZYTKOWNIKA
 - vim: podokno jak w plugin/taglist.vim [TT]
 - graficzny: strzalki do odpowiednich funkcji
 
-TWORZENIE LEVELI ALGO:
-NEXT:
 
 Inne narzedzia generujące call graph:
 - doxygen (probably python too)
