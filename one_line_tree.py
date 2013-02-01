@@ -7,6 +7,23 @@
 from collections import OrderedDict as OD
 
 
+css = { 
+        "sym" : {
+          "left" : "(",
+          "right" : ")",
+          "middle" : "",
+          "sel_l" : "*",
+          "sel_r" : "*",
+        },
+        "col": {
+        },
+        "names": {
+          "parents" : "P",
+          "siblings" : "S",
+          "childs" : "C",
+        }
+      }
+
 def main( current_sel, width ):
   if not len( current_sel ):
     current_sel = ["childs", "acc"]
@@ -17,21 +34,6 @@ def main( current_sel, width ):
                ("4",        OD([ ("kota",0) ]) ),
                (">4",       OD([ ("fx",0), ("xx123456789"*6,0) ]) )
                ])
-
-  css = { 
-          "sym" : {
-            "left" : "(",
-            "right" : ")",
-            "middle" : ""
-          },
-          "col": {
-          },
-          "names": {
-            "parents" : "P",
-            "siblings" : "S",
-            "childs" : "C",
-          }
-        }
 
 
   return render_line( tree, current_sel, width, css )
@@ -78,8 +80,7 @@ def render_element( e_curr, tree, current_sel, width, css ):
     # selected element
     rendered_subelements = OD( )
     for sub_e,subsub_e in tree[e_curr].items():
-      # width here is much too much
-      render = render_subelement( sub_e, tree, current_sel[1:], 0, css )
+      render = render_subelement( sub_e, tree, current_sel[0]==sub_e, 0, css )
       rendered_subelements[ sub_e ] = render
 
     totalwidth = 0
@@ -99,8 +100,11 @@ def render_element( e_curr, tree, current_sel, width, css ):
 
   return out
 
-def render_subelement( e_curr, tree, current_sel, width, css ):
-  return e_curr
+def render_subelement( e_curr, tree, selected, width, css ):
+  if selected:
+    return css["sym"]["sel_l"] + e_curr+css["sym"]["sel_r"] 
+  else:
+    return e_curr
 
 if __name__ == "__main__": 
   import sys

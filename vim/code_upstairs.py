@@ -9,20 +9,8 @@ from os import path
 import cu
 import one_line_tree
 
-STYLE = { 
-       "sym" : {
-         "left" : "(",
-         "right" : ")",
-         "middle" : ""
-       },
-       "col": {
-       },
-       "names": {
-         "parents" : "P",
-         "siblings" : "S",
-         "childs" : "C",
-       }
-     }
+STYLE = one_line_tree.css # default css
+
 start_function = "main"
 
 CONNECTION = cu.init_connection()
@@ -82,4 +70,18 @@ def select_next_layer(inc=1):
 
   refresh_statusline()
 
+def select_next_function(inc=1):
+  global SEL
+  current_layer = SEL[0]
+  options = DB[current_layer].keys()
+  current = SEL[1]
+  try :
+    idx = options.index( current )
+  except ValueError:
+    idx = 0
+  
+  idx = (idx+inc) %len(options)
+  SEL[1] = options[ idx ] 
+
+  refresh_statusline()
    
