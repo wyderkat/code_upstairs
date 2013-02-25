@@ -283,6 +283,7 @@ class Location(object):
     # sorting back-reference
     for i in me.backref.values():
       i.sort( lambda x,y: cmp( x[0],y[0] ) )
+    me.ref = functions_tree.all # normal reference
   def what( me, file, line ) :
     """
     What function definition is in this line and file
@@ -296,6 +297,15 @@ class Location(object):
     except KeyError: # nothing in file
       founded = None
     return founded
+  def where( me, function ) :
+    """
+    Where function is located
+    """
+    try:
+      f = me.ref[ function ] 
+      return (f.file, f.line)
+    except KeyError:
+      return None
 
 
     

@@ -41,7 +41,15 @@ def cursor_move_handler():
       DB = None
     else:
       DB = ROOT.who(function).what_is_upstairs()
-      SEL = [ DB.keys()[0] ]
+      try:
+        layer = DB.keys()[0]
+      except IndexError:
+        layer = None
+      try:
+        function = DB[layer].keys()[0]
+      except IndexError:
+        function = None
+      SEL = [ layer, function ]
     refresh_statusline()
 
 cursor_move_handler._previous_function = None
@@ -67,6 +75,10 @@ def select_next_layer(inc=1):
   
   idx = (idx+inc) %len(options)
   SEL[0] = options[ idx ] 
+  try:
+    SEL[1] = DB[ SEL[0] ].keys()[0]
+  except IndexError:
+    SEL[1] = None
 
   refresh_statusline()
 
@@ -84,4 +96,12 @@ def select_next_function(inc=1):
   SEL[1] = options[ idx ] 
 
   refresh_statusline()
+
+def jump_to_function():
+  function = SEL[1]
+  if function:
+    where = LOC.where( function )
+    print "jumping to %s" % str(where) 
+    if where != None:
+      vim.command("edit +%d %s" % (where[1], where[0]))
    
