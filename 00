@@ -1,5 +1,5 @@
 NEXT -
-implement as a statusline with rich keybindings
+przyklady wygodnego uzycia
 
 LOGIC BASE:
 funkcje logicznie są ulozone mniej wicej w drzewo, 
@@ -30,9 +30,4 @@ http://sourceforge.net/projects/ccglue/
 
 
 
-=====================================
-colory 2D
-funkcje sąsiednie Hue
-funkcje podrzedne Saturation
-
-Jak sie maja klasy do tego projektu
+Jak sie maja klasy do funkcji

@@ -19,4 +19,5 @@ map <silent> <space>. :python code_upstairs.select_next_layer()<cr>
 map <silent> <space>, :python code_upstairs.select_next_layer(inc=-1)<cr>
 map <silent> <space>m :python code_upstairs.select_next_function()<cr>
 map <silent> <space>n :python code_upstairs.select_next_function(inc=-1)<cr>
-map <silent> <space>/ :python code_upstairs.jump_to_function()<cr>
+map <silent> <space>b :python code_upstairs.jump_to_function()<cr>
+map <silent> <space>/ :python code_upstairs.heighlight_function()<cr>

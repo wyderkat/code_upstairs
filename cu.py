@@ -8,15 +8,46 @@
 from subprocess import Popen,PIPE  
 #from pdb import set_trace as trace
 from collections import OrderedDict as OD
+import os
 
 
-def init_connection( ):
+import fnmatch
+import os
+def count_file_types( pattern ):
+  count = 0
+  for root, dirnames, filenames in os.walk('.'):
+    for filename in fnmatch.filter(filenames, pattern):
+      count += 1
+  return count
+
+def init_connection( mode = None ):
   CSCOPE = 'cscope'
-  pipes = Popen( [CSCOPE,'-l','-k','-R'],
-                stdin=PIPE,
-                stdout=PIPE,
-                stderr=PIPE)  
-  return pipes
+
+  if mode == None:
+    c_count = count_file_types("*.c")
+    py_count = count_file_types("*.py")
+    print "c %d py %d" % (c_count, py_count)
+    if c_count > py_count:
+      mode = "c"
+    elif py_count > c_count:
+      mode = "python"
+    else: # equal
+      mode = "c"
+  print mode
+
+  if mode == "c":
+    special_flags = ['-k','-R' ]
+  elif mode == "python":
+    code = os.system("pycscope -R")
+    if code != 0:
+      return None
+    # -d not generate db
+    special_flags = ['-d']
+
+  return Popen( [CSCOPE,'-l'] + special_flags,
+              stdin=PIPE,
+              stdout=PIPE,
+              stderr=PIPE)  
 
 def Create_tree( conn, f_name, parent = None, visited = {} ) :
 # visited {'fun_name': Function, 'not_our_fun_name': None }
@@ -37,6 +68,8 @@ def Create_tree( conn, f_name, parent = None, visited = {} ) :
         f = Function(f_name)
       visited[f.name] = f
       f.file = definition[0][0]
+      if f.file[:2] == "./": # pycscope bug
+        f.file = f.file[2:]
       f.line = int(definition[0][2])
       outs = writeln(conn, "2"+f.name)
       for hit in outs:

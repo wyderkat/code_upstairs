@@ -9,16 +9,19 @@ from os import path
 import cu
 import one_line_tree
 
+
 STYLE = one_line_tree.css # default css
 
 start_function = "main"
 
 CONNECTION = cu.init_connection()
+
 OLD_STATUSLINE = vim.eval("&statusline") 
 
 ROOT = cu.Create_tree( CONNECTION, start_function)
 ROOT.find_strong_layers()
 ROOT.find_all_distances( end_name = start_function ) 
+#ROOT.print_tree(layers=True)
 
 # functions locations in files
 LOC = cu.Location( ROOT )
@@ -42,7 +45,7 @@ def cursor_move_handler():
     else:
       DB = ROOT.who(function).what_is_upstairs()
       try:
-        layer = DB.keys()[0]
+        layer = DB.keys()[2]
       except IndexError:
         layer = None
       try:
@@ -104,4 +107,9 @@ def jump_to_function():
     print "jumping to %s" % str(where) 
     if where != None:
       vim.command("edit +%d %s" % (where[1], where[0]))
+
+def heighlight_function():
+  function = SEL[1]
+  if function:
+    vim.command("/%s" % function)
    
