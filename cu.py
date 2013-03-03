@@ -26,14 +26,12 @@ def init_connection( mode = None ):
   if mode == None:
     c_count = count_file_types("*.c")
     py_count = count_file_types("*.py")
-    print "c %d py %d" % (c_count, py_count)
     if c_count > py_count:
       mode = "c"
     elif py_count > c_count:
       mode = "python"
     else: # equal
       mode = "c"
-  print mode
 
   if mode == "c":
     special_flags = ['-k','-R' ]
