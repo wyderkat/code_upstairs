@@ -5,14 +5,14 @@
 # Licensed under GPL-2
 ##
 
-from subprocess import Popen,PIPE  
-#from pdb import set_trace as trace
-from collections import OrderedDict as OD
 import os
-
-
 import fnmatch
-import os
+from subprocess import Popen,PIPE  
+from collections import OrderedDict as OD
+
+def error( txt ):
+  print "Error: %s!!!" % txt
+
 def count_file_types( pattern ):
   count = 0
   for root, dirnames, filenames in os.walk('.'):
@@ -273,32 +273,6 @@ class Function(object):
     return len(Function.all)
 
 
-  def what_is_upstairs( me ):
-    tree = OD ()
-    # parents
-    j = OD()
-    for fn in me.used.keys():
-      j[ fn ] = 0 # 0 because of later use
-    tree[ "parents" ] = j
-    # siblings
-    j = OD()
-    for fn in me.what_strong_layer_siblings():
-      j[ fn ] = 0 # 0 because of later use
-    tree[ "siblings" ] = j
-    # childs
-    j = OD()
-    for fn in me.what_strong_layer_childs():
-      j[ fn ] = 0 # 0 because of later use
-    tree[ "childs" ] = j
-    # other distances
-    for f in me.calls.values():
-      d = f.max_distance()
-      if d>=0:
-        try:
-          tree[ str(d) ][ f.name ] = 0 
-        except KeyError:
-          tree[ str(d) ] = OD( [ (f.name, 0) ] )
-    return tree
 
 class Location(object):
   def __init__( me, functions_tree ):
@@ -338,12 +312,126 @@ class Location(object):
     except KeyError:
       return None
 
+class FunctionDB(object):
+  """
+  Code Upstairs Description of a give function
+  """
+  def __init__( me, function ):
+
+    me.D = OD () # data, dictionary of functions levels
+    # parents
+    i = OD()
+    for fn in function.used.keys():
+      i[ fn ] = 0 # 0 because of later use
+    me.D[ "parents" ] = i
+    # siblings
+    i = OD()
+    for fn in function.what_strong_layer_siblings():
+      i[ fn ] = 0 # 0 because of later use
+    me.D[ "siblings" ] = i
+    # childs
+    i = OD()
+    for fn in function.what_strong_layer_childs():
+      i[ fn ] = 0 # 0 because of later use
+    me.D[ "childs" ] = i
+    # other distances
+    for f in function.calls.values():
+      d = f.max_distance()
+      if d>=0:
+        try:
+          me.D[ str(d) ][ f.name ] = 0 
+        except KeyError:
+          me.D[ str(d) ] = OD( [ (f.name, 0) ] )
+    # default selection
+    me.layer_S = None
+    me.fname_S = None
+    # empty list of text layers
+    me.T = OD()
+
+  def get_all_layers( me ):
+    return me.T.keys() + me.D.keys()
+
+  def get_fnames_in_layer( me , layer):
+    try:
+      result = me.D[layer].keys()
+    except KeyError:
+      result = me.T[layer]
+    return result
+      
+
+  def prepend_text_layer( me, title, text ):
+    me.T[ title ] = text
+
+  def is_text_layer( me, layer ):
+    return layer in me.T.keys()
+
+  def get_text_layer( me , layer):
+    return me.T[layer]
+
+  def select( me, layer = None, fname = None ):
+    if layer:
+      me.layer_S = layer
+    if not me.layer_S:
+      error("Layer is not selected")
+    if fname:
+      me.fname_S = fname
+    if not me.fname_S:
+      try:
+        me.fname_S = me.get_fnames_in_layer( me.layer_S ) [0]
+      except IndexError: # no single fname in layer
+        me.fname_S = None
+
+  def select_next_layer( me , inc=1 ):
+    all = me.get_all_layers()
+    if not me.layer_S:
+      me.layer_S = all [0] # maybe move to select()
+    try :
+      idx = all.index( me.layer_S )
+    except ValueError:
+      idx = 0
+    idx = (idx+inc) % len(all)
+    me.layer_S = all[idx] 
+
+    # auto selecting fname
+    me.fname_S = None
+    me.select()
+
+  def select_next_fname( me , inc=1 ):
+    all = me.get_all_layers()
+    if not me.layer_S:
+      me.layer_S = all [0] # maybe move to select()
+    all_fnames = me.get_fnames_in_layer( me.layer_S )
+    try :
+      idx = all_fnames.index( me.fname_S )
+    except ValueError:
+      idx = 0
+    idx = (idx+inc) % len(all_fnames)
+    me.fname_S = all_fnames[idx] 
+
+  def is_selected( me, layer = None, fname = None ):
+    result = True
+    if layer:
+      if not me.layer_S == layer:
+        result = False
+    if fname:
+      if not me.fname_S == fname:
+        result = False
+    return result
+
+  def get_selected( me ):
+    return ( me.layer_S, me.fname_S )
+
+
+
+
+
+
+
+    
 
     
 
 if __name__ == "__main__":
-
-
   import sys
   fname = "main"
 
@@ -365,6 +453,4 @@ if __name__ == "__main__":
       str( root.who("init").what_strong_layer_childs() )
   print "Strong layer siblings for init: %s" % \
       str( root.who("init").what_strong_layer_siblings() )
-  print "What is upstairs: %s" % \
-      str( root.who("calc").what_is_upstairs() )
   #print loc.what( "linenoise.c", 200 )

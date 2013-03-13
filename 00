@@ -1,5 +1,12 @@
 NEXT -
-przyklady wygodnego uzycia
+Poprawić architecture
+Zrobić wtyczkę VIM
+Opublikowac wtyczkę VIM
+Zaplanowac wtyczke graficzną
+Zrobić wtyczkę Geany
+
+TODO:
+algorthm szukania dystanow jest trefny
 
 LOGIC BASE:
 funkcje logicznie są ulozone mniej wicej w drzewo, 
@@ -16,18 +23,9 @@ INTERAKCJA Z UZYTKOWNIKIEM:
   Generowanie raportu, diagramu...
 
 WIDOK DLA UZYTKOWNIKA
-- vim: podokno jak w plugin/taglist.vim [TT]
-- graficzny: strzalki do odpowiednich funkcji
 
-
-Inne narzedzia generujące call graph:
-- doxygen (probably python too)
-- cflow (only c) 
-- pyscope
 
 Generacja crossreference from cscope and ctags
 http://sourceforge.net/projects/ccglue/
-
-
 
 Jak sie maja klasy do funkcji

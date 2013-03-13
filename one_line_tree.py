@@ -5,6 +5,7 @@
 # Licensed under GPL-2
 ##
 from collections import OrderedDict as OD
+from code_upstairs_core import Function, FunctionDB
 
 
 css = { 
@@ -21,34 +22,39 @@ css = {
           "parents" : "P",
           "siblings" : "S",
           "childs" : "C",
+          "status" : "-",
         }
       }
 
 def main( current_sel, width ):
   if not len( current_sel ):
     current_sel = ["childs", "acc"]
-  tree = OD ([ ("parents",  OD([ ("main",0) ]) ) , 
+  stub = Function("stub")
+  stub.find_strong_layers()
+  db = FunctionDB( stub )
+  db.D = OD ([ ("parents",  OD([ ("main",0) ]) ) , 
                ("siblings", OD([ ("init",0), ("update",0) ]) ) , 
                ("childs",   OD([ ("calc",0), ("precalc",0), ("acc",0) ]) ),
                ("3",        OD([ ("ola",0), ("ma",0) ]) ), 
                ("4",        OD([ ("kota",0) ]) ),
                (">4",       OD([ ("fx",0), ("xx123456789"*6,0) ]) )
                ])
+  db.prepend_text_layer("-", "Ola i kot sa w domu")
+  db.select( current_sel[0], current_sel[1] )
 
+  return render_line( db, width, css )
 
-  return render_line( tree, current_sel, width, css )
-
-def render_line( tree, current_sel, width, css ):
+def render_line( db, width, css ):
   rendered_elements = OD( )
-  e_sel = current_sel[0]
-  for e,sub_e in tree.items():
-    if e == e_sel:
+  current_selected = db.get_selected()[0]
+  for l in db.get_all_layers():
+    if l == current_selected:
       # skip now, just placeholder
       render = ""
     else:
-      render = render_element( e, tree, None, 0, css )
+      render = render_layer( db, l, 0, css )
 
-    rendered_elements[ e ] = render
+    rendered_elements[ l ] = render
 
   totalwidth = 0
   for s in rendered_elements.values():
@@ -56,32 +62,33 @@ def render_line( tree, current_sel, width, css ):
 
   if totalwidth >= width:
       print "not enough space to render"
-      return " " * width
+      return "-" * width
   # missing selected element
-  rendered_elements[ e_sel ] = \
-        render_element( e_sel, tree, current_sel[1:], width - totalwidth , css )
+  rendered_elements[ current_selected ] = \
+        render_layer( db, current_selected, width - totalwidth , css )
 
   #put it back together
   return "".join( rendered_elements.values() )
 
   
-def render_element( e_curr, tree, current_sel, width, css ):
+def render_layer( db, layer, width, css ):
 
   out = css["sym"]["left"]
   try:
-    out += css["names"][e_curr]
+    out += css["names"][layer]
   except KeyError:
-    out += e_curr
+    out += layer
 
-  if current_sel == None: 
-    # not selected element
-    out += css["sym"]["right"]
-  else:
-    # selected element
+  if db.is_selected( layer=layer ): 
     rendered_subelements = OD( )
-    for sub_e,subsub_e in tree[e_curr].items():
-      render = render_subelement( sub_e, tree, current_sel[0]==sub_e, 0, css )
-      rendered_subelements[ sub_e ] = render
+    # TODO
+    if db.is_text_layer( layer ):
+      # in case of flat text element, just print it
+      rendered_subelements[ layer ] = db.get_text_layer( layer )
+    else:
+      for f in db.get_fnames_in_layer( layer ):
+        render = render_fname( db, layer, f, 0, css )
+        rendered_subelements[ f ] = render
 
     totalwidth = 0
     for s in rendered_subelements.values():
@@ -96,15 +103,17 @@ def render_element( e_curr, tree, current_sel, width, css ):
     else:
       print "width %d space %d" % ( width, space )
       out = out[ : width-len(right) ] + right
-
+  else:
+    # not selected layer
+    out += css["sym"]["right"]
 
   return out
 
-def render_subelement( e_curr, tree, selected, width, css ):
-  if selected:
-    return css["sym"]["sel_l"] + e_curr+css["sym"]["sel_r"] 
+def render_fname( db, layer, fname, width, css ):
+  if db.is_selected( layer=layer, fname=fname ): 
+    return css["sym"]["sel_l"] + fname + css["sym"]["sel_r"] 
   else:
-    return e_curr
+    return fname
 
 if __name__ == "__main__": 
   import sys
