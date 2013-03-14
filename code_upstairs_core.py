@@ -13,6 +13,13 @@ from collections import OrderedDict as OD
 def error( txt ):
   print "Error: %s!!!" % txt
 
+class MissingSources(Exception):
+  """
+  Thrown when cscope or other parser cannot get data from sources.
+  Probably file sources are missing
+  """
+  pass
+
 def count_file_types( pattern ):
   count = 0
   for root, dirnames, filenames in os.walk('.'):
@@ -20,7 +27,7 @@ def count_file_types( pattern ):
       count += 1
   return count
 
-def init_connection( mode = None ):
+def init_connection( dir = ".",  mode = None ):
   CSCOPE = 'cscope'
 
   if mode == None:
@@ -45,7 +52,11 @@ def init_connection( mode = None ):
   return Popen( [CSCOPE,'-l'] + special_flags,
               stdin=PIPE,
               stdout=PIPE,
-              stderr=PIPE)  
+              stderr=PIPE,
+              cwd=dir )
+
+def shutdown_connection ( popen ):
+  popen.terminate()
 
 def Create_tree( conn, f_name, parent = None, visited = {} ) :
 # visited {'fun_name': Function, 'not_our_fun_name': None }
@@ -89,8 +100,7 @@ def writeln( conn, str, columns=1 ):
   try:
     no_of_lines = int( line.split()[2] ) 
   except IndexError:
-    print "IndexError: " + line
-    print "STR: " + str
+    raise MissingSources("No data for %s command" % str)
   #print "NO %d" %no_of_lines
   result = []
   for i in range(no_of_lines):
@@ -357,7 +367,6 @@ class FunctionDB(object):
     except KeyError:
       result = me.T[layer]
     return result
-      
 
   def prepend_text_layer( me, title, text ):
     me.T[ title ] = text
@@ -422,18 +431,10 @@ class FunctionDB(object):
     return ( me.layer_S, me.fname_S )
 
 
-
-
-
-
-
-    
-
-    
-
 if __name__ == "__main__":
   import sys
   fname = "main"
+  print "testing from __main__"
 
   if len(sys.argv) > 1:
     fname = sys.argv[1]
