@@ -22,13 +22,14 @@ def init( args ):
 
   try:
 
+    cu.CONNECTION = code_upstairs_core.init_connection( cu.DIR )
+
     cu.STYLE = one_line_tree.css # default css
 
     cu.START_FUNCTION = "main"
 
-    cu.CONNECTION = code_upstairs_core.init_connection( cu.DIR )
-
     cu.OLD_STATUSLINE = vim.eval("&statusline") 
+    cu.OLD_STATUSLINE_VISIBILITY = vim.eval("&laststatus") 
 
     # without visited={} python uses old visited dictionary
     # reinitialization not possible
@@ -42,6 +43,9 @@ def init( args ):
     cu.LOCATIONS = code_upstairs_core.Location( cu.ROOT )
     # function data cu.DB
     cu.DB = None
+    if cu.OLD_STATUSLINE_VISIBILITY != "2":
+      vim.command('set laststatus=%s' % "2")
+
     # selection object
     if cu.OLD_STATUSLINE == "":
       # we cannot use it now, because we are formatting everything with text
@@ -54,8 +58,13 @@ def init( args ):
     cursor_move_handler()
   except code_upstairs_core.MissingSources:
     shutdown()
-    return False
-  return True
+    return 1
+  except code_upstairs_core.MissingScopeApp, e:
+    if str(e)[:2] == "Py":
+      return 3
+    else:
+      return 2
+  return 0
 
 
 def shutdown():
@@ -68,6 +77,8 @@ def shutdown():
     vim.command('set statusline=%s' % sl)
   except:
     print "DBG CMD>%s<" % sl
+
+  vim.command('set laststatus=%s' % cu.OLD_STATUSLINE_VISIBILITY)
   #
   cu = CodeUpstairs() 
 

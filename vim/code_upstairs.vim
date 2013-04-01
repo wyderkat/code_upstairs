@@ -5,12 +5,14 @@
 ""
 
 python << PY_END
-import sys
-from os import path
-sys.path.insert(0, "/home/tom/cu")
-sys.path.insert(0, "/home/tom/cu/vim")
-import code_upstairs 
 import vim
+import sys
+import os
+# get the directory this script is in: the pyflakes python module should be installed there.
+scriptdir = os.path.join( os.path.dirname(
+  vim.eval('expand("<sfile>")')), 'code_upstairs.dir')
+sys.path.insert(0, scriptdir)
+import code_upstairs 
 PY_END
 
 if !exists('CUkeyNextLayer')
@@ -34,15 +36,19 @@ endif
 
 
 function! CUinitbridge(args)
-  python vim.command( "return 0" if code_upstairs.init( vim.eval("a:args") ) else "return 1" )
+  python vim.command( "return %d" % code_upstairs.init( vim.eval("a:args") )  )
 endfunction
 
 " TODO double initialization error
 command! -nargs=? -complete=dir CUinit call CUinit(<f-args>)
 function! CUinit(...)  
   let l:init_result = CUinitbridge(a:000)
-  if l:init_result
-    echom "Code Upstairs initialization error: missing source files"
+  if l:init_result == 1
+    echom "Code Upstairs initialization error: missing sources (project) files "
+  elseif l:init_result == 2
+    echom "Code Upstairs initialization error: cannot lunch `cscope` "
+  elseif l:init_result == 3
+    echom "Code Upstairs initialization error: cannot lunch `pycscope` "
   else
     augroup code_upstairs
       autocmd!

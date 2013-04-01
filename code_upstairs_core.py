@@ -20,6 +20,12 @@ class MissingSources(Exception):
   """
   pass
 
+class MissingScopeApp(Exception):
+  """
+  Thrown when cscope or pycscope or other parser cannot be started
+  """
+  pass
+
 def count_file_types( pattern ):
   count = 0
   for root, dirnames, filenames in os.walk('.'):
@@ -45,15 +51,18 @@ def init_connection( dir = ".",  mode = None ):
   elif mode == "python":
     code = os.system("pycscope -R")
     if code != 0:
-      return None
+      raise MissingScopeApp("Pycscope cannot be launch")
     # -d not generate db
     special_flags = ['-d']
 
-  return Popen( [CSCOPE,'-l'] + special_flags,
-              stdin=PIPE,
-              stdout=PIPE,
-              stderr=PIPE,
-              cwd=dir )
+  try:
+    return Popen( [CSCOPE,'-l'] + special_flags,
+                stdin=PIPE,
+                stdout=PIPE,
+                stderr=PIPE,
+                cwd=dir )
+  except OSError:
+    raise MissingScopeApp("Cscope cannot be launch")
 
 def shutdown_connection ( popen ):
   popen.terminate()
