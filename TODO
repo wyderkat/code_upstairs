@@ -1,29 +1,16 @@
-NEXT -
-strona na cofoh, wiecej promocji
-Zaplanowac wtyczke graficzną
-Zrobić wtyczkę Geany
+- design graphical plugin
+- develop graphical plaugin for Gedit
+- generic text raports 
 
-TODO:
-algorthm szukania dystanow jest trefny
+- more case studies:
+ -- why it doesn't work with code_upstairs_core.py
+- algo searching distances is very poor. 
 
-LOGIC BASE:
-funkcje logicznie są ulozone mniej wicej w drzewo, 
-ale w kodzie tego wogóle nie widać!
+cosmetics:
+- jump back
+- remember function and layer for every function
 
-ZALOZENIE:
-Pomaganie w duzych projektach
-(a nie skakanie po funkcjach)
-
-INTERAKCJA Z UZYTKOWNIKIEM:
-  Podczas edycji
-    Pokaznie mu funkcji z podlewelów obecnej funkcji.
-    Pokazniae mu funkcji na nadlewelu obecnej. 
-  Generowanie raportu, diagramu...
-
-WIDOK DLA UZYTKOWNIKA
-
-
-Generacja crossreference from cscope and ctags
 http://sourceforge.net/projects/ccglue/
 
-Jak sie maja klasy do funkcji
+BIG QUESTIONS:
+- what about classes and methods? 

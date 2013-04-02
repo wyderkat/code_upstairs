@@ -78,7 +78,6 @@ so should be much more user friendly.
 
 ## _Code Upstairs_ Project Houses ##
 
-
-* [at my website](http://www.cofoh.com/code_upstairs)
 * [vim plugin at vim.org](http://www.vim.org/scripts/script.php?script_id=4498)
 * [at github](http://github.com/wyderkat/code_upstairs)
+* [at my website](http://www.cofoh.com/code_upstairs)
