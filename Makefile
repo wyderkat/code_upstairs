@@ -3,7 +3,7 @@ VER=0.3
 CORE=code_upstairs_core.py one_line_tree.py 
 VIM_SPECIFIC=vim/code_upstairs.py
 VIM_STARTER=vim/code_upstairs.vim
-README=vim/README.md
+README=README.md
 
 
 vim: cu-vim-$(VER).tgz
@@ -18,7 +18,7 @@ cu-vim-$(VER).tgz: $(CORE) $(VIM_STARTER) $(VIM_SPECIFIC)
 	tar zfc $@ code_upstairs-$(VER)
 	rm -r code_upstairs-$(VER)
 
-html: vim/README.html
+html: README.html
 
 %.html: %.md
 	markdown $^ > $@

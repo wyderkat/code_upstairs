@@ -1,10 +1,7 @@
-Code Upstairs
-=============
-
-A plugin for browsing source code at functions level. 
+# Code Upstairs - browsing source code at functions level #
 
 Readability of source code is decreasing when project is getting bigger. The
-aim of this plugin is to make code more easily readable and understandable.
+aim of this tool is to make code more easily readable and understandable.
 In other words it is trying to put big projects more under control.
 
 Normally readability of long single function is preserved by using indentation of
@@ -15,8 +12,11 @@ User can see fairly easily how current function is dependent upon others. He
 will also get structure of all functions in code in a tree layout if code is clearly
 implemented. So therefor _Code Upstairs_ is also kind of quality controller.
 
-Installation
-------------
+_Code Upstairs_ is a programmer editors plugins. 
+
+## Vim plugin ##
+
+### Installation ###
 Unpack `cu-vim-VERSION.tgz` and the content of extracted `code_upstairs-VERSION` directory move
 to your `~/.vim/` or whole directory to Pathogen corner. 
 
@@ -26,8 +26,7 @@ for **Python** you need `cscope` along with `pycscope`
 
 Vim has to be compiled with `python` support. 
 
-Usage
------
+### Usage ###
 Open some file of your project and call:
 
     :CUinit <directory> 
@@ -43,8 +42,7 @@ To turn off _Code Upstairs_ use:
 
     :CUshutdown
 
-Statusline
-----------
+### Statusline ###
 Functions structure is shown in statusline.
 Because of limited space statusline is divided to layers. 
 Following layers are shown in order from left to right:
@@ -63,8 +61,7 @@ Following layers are shown in order from left to right:
    distributed over code. Distance `XX` tells how far they are distributed.
    Further functions distances can mean not clear implementation or code design.
 
-Keybindings
------------
+### Keybindings ###
 Default keybindings can be change using variables given in parenthesis. 
 
 + `<space>.` and `<space>,` will switch layer forward and backward.
@@ -73,3 +70,14 @@ Default keybindings can be change using variables given in parenthesis.
   backward. (`CUkeyNextFunction` and `CUkeyPrevFunction`)
 + `<space>b` will jump to function definition (`CUkeyJumpToFunction`)
 + `<space>/` will highlight function name in vim window (`CUkeyHighlightFunction`)
+
+## Gedit and Geany editors plugin ##
+As for today Vim plugin is the only one which (somehow) works...
+Plugins for Gedit and Geany are under development. They are graphical widgets, 
+so should be much more user friendly. 
+
+## _Code Upstairs_ Project Houses ##
+
+* [at my website](http://www.cofoh.com/code_upstairs)
+* [vim plugin at vim.org](http://www.vim.org/scripts/script.php?script_id=4498)
+* [at github](http://github.com/wyderkat)
