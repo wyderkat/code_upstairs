@@ -69,6 +69,7 @@ Default keybindings can be change using variables given in parenthesis.
 + `<space>m` and `<space>n` will switch function in a layer forward and
   backward. (`CUkeyNextFunction` and `CUkeyPrevFunction`)
 + `<space>b` will jump to function definition (`CUkeyJumpToFunction`)
++ `<space>v` will jump back (`CUkeyJumpBack`)
 + `<space>/` will highlight function name in vim window (`CUkeyHighlightFunction`)
 
 ## Gedit and Geany editors plugin ##

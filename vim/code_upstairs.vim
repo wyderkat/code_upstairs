@@ -30,6 +30,9 @@ endif
 if !exists('CUkeyJumpToFunction')
     let g:CUkeyJumpToFunction = '<space>b'
 endif
+if !exists('CUkeyJumpBack')
+    let g:CUkeyJumpBack = '<space>v'
+endif
 if !exists('CUkeyHighlightFunction')
     let g:CUkeyHighlightFunction = '<space>/'
 endif
@@ -60,6 +63,7 @@ function! CUinit(...)
     exec "map <silent>" g:CUkeyNextFunction ":python code_upstairs.select_next_fname()<cr>"
     exec "map <silent>" g:CUkeyPrevFunction ":python code_upstairs.select_next_fname(inc=-1)<cr>"
     exec "map <silent>" g:CUkeyJumpToFunction ":python code_upstairs.jump_to_fname()<cr>"
+    exec "map <silent>" g:CUkeyJumpBack "<C-O>"
     exec "map <silent>" g:CUkeyHighlightFunction ":python code_upstairs.heighlight_fname()<cr>"
   endif
 endfunction
@@ -73,6 +77,7 @@ function! CUshutdown()
   exec "unmap <silent>" g:CUkeyNextFunction
   exec "unmap <silent>" g:CUkeyPrevFunction
   exec "unmap <silent>" g:CUkeyJumpToFunction
+  exec "unmap <silent>" g:CUkeyJumpBack
   exec "unmap <silent>" g:CUkeyHighlightFunction
 endfunction
 

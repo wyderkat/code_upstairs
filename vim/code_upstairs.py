@@ -41,8 +41,11 @@ def init( args ):
 
     # functions locations in files
     cu.LOCATIONS = code_upstairs_core.Location( cu.ROOT )
-    # function data cu.DB
+    # function data of current function
     cu.DB = None
+    # cache of function data
+    cu.DBcache = {}
+
     if cu.OLD_STATUSLINE_VISIBILITY != "2":
       vim.command('set laststatus=%s' % "2")
 
@@ -95,9 +98,13 @@ def cursor_move_handler():
     if function == None:
       cu.DB = None
     else:
-      cu.DB = code_upstairs_core.FunctionDB( cu.ROOT.who(function) )
-      cu.DB.prepend_text_layer( "-", cu.USER_STATUSLINE )
-      cu.DB.select( layer = "childs" )
+      try:
+        cu.DB = cu.DBcache[ function ]
+      except KeyError:
+        cu.DB = code_upstairs_core.FunctionDB( cu.ROOT.who(function) )
+        cu.DB.prepend_text_layer( "-", cu.USER_STATUSLINE )
+        cu.DB.select( )
+        cu.DBcache[ function ] = cu.DB
     refresh_statusline()
 
 cursor_move_handler._previous_function = None

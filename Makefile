@@ -1,4 +1,4 @@
-VER=0.3
+VER=0.4
 
 CORE=code_upstairs_core.py one_line_tree.py 
 VIM_SPECIFIC=vim/code_upstairs.py

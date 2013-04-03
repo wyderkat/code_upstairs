@@ -362,8 +362,11 @@ class FunctionDB(object):
         except KeyError:
           me.D[ str(d) ] = OD( [ (f.name, 0) ] )
     # default selection
-    me.layer_S = None
+    me.layer_S = "childs"
     me.fname_S = None
+    # list of recently selected functions in layer
+    # so we can remember
+    me.fnames_S_recent = {}
     # empty list of text layers
     me.T = OD()
 
@@ -389,42 +392,41 @@ class FunctionDB(object):
   def select( me, layer = None, fname = None ):
     if layer:
       me.layer_S = layer
-    if not me.layer_S:
-      error("Layer is not selected")
     if fname:
       me.fname_S = fname
     if not me.fname_S:
       try:
-        me.fname_S = me.get_fnames_in_layer( me.layer_S ) [0]
-      except IndexError: # no single fname in layer
+        me.fname_S = me.fnames_S_recent[ me.layer_S ]
+      except KeyError:
         me.fname_S = None
+      if not me.fname_S:
+        try:
+          me.fname_S = me.get_fnames_in_layer( me.layer_S ) [0]
+        except IndexError: # no single fname in layer
+          me.fname_S = None
+
+    me.fnames_S_recent[ me.layer_S ] = me.fname_S
 
   def select_next_layer( me , inc=1 ):
     all = me.get_all_layers()
-    if not me.layer_S:
-      me.layer_S = all [0] # maybe move to select()
-    try :
-      idx = all.index( me.layer_S )
-    except ValueError:
-      idx = 0
+    idx = all.index( me.layer_S )
     idx = (idx+inc) % len(all)
     me.layer_S = all[idx] 
 
-    # auto selecting fname
     me.fname_S = None
     me.select()
 
   def select_next_fname( me , inc=1 ):
-    all = me.get_all_layers()
-    if not me.layer_S:
-      me.layer_S = all [0] # maybe move to select()
     all_fnames = me.get_fnames_in_layer( me.layer_S )
-    try :
+    if len(all_fnames) == 0:
+      return
+    if me.fname_S:
       idx = all_fnames.index( me.fname_S )
-    except ValueError:
+    else: # me.fname_S == None
       idx = 0
     idx = (idx+inc) % len(all_fnames)
     me.fname_S = all_fnames[idx] 
+    me.fnames_S_recent[ me.layer_S ] = me.fname_S
 
   def is_selected( me, layer = None, fname = None ):
     result = True
