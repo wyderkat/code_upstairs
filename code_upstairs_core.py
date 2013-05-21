@@ -231,6 +231,14 @@ class Function(object):
       result.append( f.name )
     return result
 
+  def what_strong_layer_childs_fun( me ):
+    result = []
+    try:
+      result = Function.strong_layers[ me.name ]
+    except KeyError:
+      return result
+    return result
+
   def what_strong_layer_siblings( me ):
     result = []
     for k,v in Function.strong_layers.items():
