@@ -1,3 +1,4 @@
+*.pyc
 cu*.tgz
 *.swp
 cases
