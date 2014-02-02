@@ -1,3 +1,7 @@
+ERROR: when no file open, but in good directory:
+code_upstairs.py -> move_handler() -> line  3rd... in this function
+
+
 - design graphical plugin
 - develop graphical plaugin for Gedit
 - generic text raports 

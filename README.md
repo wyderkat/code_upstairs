@@ -1,5 +1,3 @@
-# Code Upstairs - browsing source code at functions level #
-
 Readability of source code is decreasing when project is getting bigger. The
 aim of this tool is to make code more easily readable and understandable.
 In other words it is trying to put big projects more under control.
